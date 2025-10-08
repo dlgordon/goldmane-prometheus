@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goldmane-prometheus
+  namespace: calico-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goldmane-prometheus
+  template:
+    metadata:
+      labels:
+        app: goldmane-prometheus
+    spec:
+      containers:
+      - name: goldmane-prometheus
+        image: goldmane-prometheus:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GOLDMANE_ADDR
+          value: "goldmane-api.calico-system.svc:9094"
+        - name: METRICS_ADDR
+          value: ":9090"
+        - name: POLL_INTERVAL
+          value: "15"
+        - name: TLS_ENABLED
+          value: "false"
+        ports:
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: metrics
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goldmane-prometheus
+  namespace: calico-system
+  labels:
+    app: goldmane-prometheus
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    targetPort: metrics
+    protocol: TCP
+    name: metrics
+  selector:
+    app: goldmane-prometheus
+---
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: goldmane-prometheus
+  namespace: calico-system
+  labels:
+    app: goldmane-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: goldmane-prometheus
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics

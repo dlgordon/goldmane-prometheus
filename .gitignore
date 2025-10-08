@@ -1,0 +1,22 @@
+# Binaries
+bin/
+
+
+# Proto generated files
+proto/*.pb.go
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
