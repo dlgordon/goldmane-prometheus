@@ -2,4 +2,4 @@ bin/
 .git/
 .gitignore
 *.md
-!CLAUDE.md
+deploy/

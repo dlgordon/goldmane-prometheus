@@ -130,6 +130,7 @@ func (c *Collector) collectFlows(ctx context.Context) error {
 
 	stream, err := c.client.Stream(ctx, req)
 	if err != nil {
+		c.metrics.APIRequests.WithLabelValues("error_stream").Inc()
 		return fmt.Errorf("failed to create stream: %w", err)
 	}
 
@@ -140,12 +141,17 @@ func (c *Collector) collectFlows(ctx context.Context) error {
 			break
 		}
 		if err != nil {
+			c.metrics.APIRequests.WithLabelValues("error_recv").Inc()
 			return fmt.Errorf("error receiving flow: %w", err)
 		}
 
 		c.processFlow(flowResult)
 		flowCount++
 	}
+
+	c.metrics.APIRequests.WithLabelValues("success").Inc()
+	c.metrics.APILastSuccessTime.SetToCurrentTime()
+	c.metrics.APIFlowsProcessed.Add(float64(flowCount))
 
 	log.Printf("Processed %d flows", flowCount)
 	return nil

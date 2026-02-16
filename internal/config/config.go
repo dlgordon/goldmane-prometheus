@@ -36,7 +36,7 @@ func LoadFromEnv() *Config {
 
 	return &Config{
 		GoldmaneAddr: getEnv("GOLDMANE_ADDR", "localhost:9094"),
-		MetricsAddr:  getEnv("METRICS_ADDR", ":9090"),
+		MetricsAddr:  getEnv("METRICS_ADDR", "0.0.0.0:9090"),
 		PollInterval: pollInterval,
 		TLSEnabled:   getEnvBool("TLS_ENABLED", false),
 		TLSCertPath:  getEnv("TLS_CERT_PATH", ""),
